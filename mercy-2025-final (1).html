@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MERCY 2025 | التحليل الشامل النهائي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --neon-cyan: #00f2ff;
+            --neon-purple: #9d00ff;
+            --neon-red: #ff003c;
+            --deep-space: #020617;
+            --glass: rgba(255,255,255,0.03);
+        }
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--deep-space);
+            color: #f8fafc;
+            font-family: 'Cairo', sans-serif;
+            line-height: 1.8;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .glass-card:hover {
+            border-color: rgba(0,242,255,0.35);
+            box-shadow: 0 0 28px rgba(0,242,255,0.07);
+            transform: translateY(-4px);
+        }
+
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+        .section-title::after {
+            content:'';
+            position:absolute;
+            bottom:-10px; right:0;
+            width:60%; height:3px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 12px var(--neon-cyan);
+            border-radius:2px;
+        }
+
+        .scan-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            position: absolute;
+            width: 100%; top: 0; left: 0;
+            animation: scan-move 5s linear infinite;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        @keyframes scan-move { 0%{top:0} 100%{top:100%} }
+
+        /* PARTICLE */
+        #particle-canvas {
+            position:fixed; top:0; left:0;
+            width:100%; height:100%;
+            z-index:0; pointer-events:none; opacity:0.3;
+        }
+
+        /* TICKER */
+        .ticker-wrap { overflow:hidden; }
+        .ticker-track {
+            display:flex; gap:80px; white-space:nowrap;
+            animation: ticker 28s linear infinite;
+        }
+        @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+        /* COUNTDOWN */
+        .cd-box {
+            background: rgba(0,0,0,0.45);
+            border: 1px solid rgba(0,242,255,0.18);
+            border-radius: 14px;
+            padding: 14px 18px;
+            text-align: center;
+            min-width: 68px;
+        }
+        .cd-num {
+            font-family:'Orbitron',sans-serif;
+            font-size:2rem; font-weight:900;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 18px var(--neon-cyan);
+            line-height:1; display:block;
+        }
+        .cd-lbl {
+            font-family:'JetBrains Mono',monospace;
+            font-size:9px; color:rgba(255,255,255,0.28);
+            letter-spacing:0.14em; text-transform:uppercase; margin-top:4px; display:block;
+        }
+
+        /* SPINNER */
+        .ai-loading {
+            border: 2px solid rgba(0,242,255,0.15);
+            border-top: 2px solid var(--neon-cyan);
+            border-radius:50%; width:15px; height:15px;
+            animation:spin 0.85s linear infinite;
+            display:inline-block; vertical-align:middle;
+        }
+        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+
+        /* INPUT */
+        .custom-input {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            transition:all 0.3s ease; color:#fff;
+        }
+        .custom-input:focus {
+            border-color: var(--neon-cyan);
+            outline:none;
+            background:rgba(0,242,255,0.04);
+            box-shadow:0 0 10px rgba(0,242,255,0.1);
+        }
+
+        /* YES/NO BUTTONS */
+        .vote-btn {
+            position:relative; overflow:hidden;
+            border-radius:18px; cursor:pointer;
+            transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+            border:2px solid transparent;
+            padding: 24px 20px;
+            display:flex; flex-direction:column;
+            align-items:center; gap:10px;
+            width:100%;
+        }
+        .vote-btn:active { transform:scale(0.96); }
+
+        .yes-btn {
+            background: rgba(0,242,255,0.05);
+            border-color: rgba(0,242,255,0.2);
+        }
+        .yes-btn:hover {
+            background: rgba(0,242,255,0.12);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 28px rgba(0,242,255,0.18), inset 0 0 18px rgba(0,242,255,0.04);
+        }
+        .yes-btn.voted {
+            background: rgba(0,242,255,0.16);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 40px rgba(0,242,255,0.28);
+        }
+
+        .no-btn {
+            background: rgba(255,0,60,0.05);
+            border-color: rgba(255,0,60,0.2);
+        }
+        .no-btn:hover {
+            background: rgba(255,0,60,0.12);
+            border-color: var(--neon-red);
+            box-shadow: 0 0 28px rgba(255,0,60,0.18), inset 0 0 18px rgba(255,0,60,0.04);
+        }
+        .no-btn.voted {
+            background: rgba(255,0,60,0.16);
+            border-color: var(--neon-red);
+            box-shadow: 0 0 40px rgba(255,0,60,0.28);
+        }
+
+        .vote-big { font-family:'Orbitron',sans-serif; font-size:2.8rem; font-weight:900; line-height:1; }
+        .vote-count-num { font-family:'Orbitron',sans-serif; font-size:2rem; font-weight:900; line-height:1; transition:all 0.3s; }
+        .yes-btn .vote-big,
+        .yes-btn .vote-count-num { color:var(--neon-cyan); text-shadow:0 0 18px var(--neon-cyan); }
+        .no-btn .vote-big,
+        .no-btn .vote-count-num  { color:var(--neon-red);  text-shadow:0 0 18px var(--neon-red); }
+
+        .bar-track { width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:99px; overflow:hidden; }
+        .bar-fill { height:100%; border-radius:99px; transition:width 0.6s cubic-bezier(0.4,0,0.2,1); }
+        .yes-fill { background:linear-gradient(90deg,#00b4db,var(--neon-cyan)); box-shadow:0 0 8px var(--neon-cyan); }
+        .no-fill  { background:linear-gradient(90deg,#c00,var(--neon-red)); box-shadow:0 0 8px var(--neon-red); }
+
+        /* RIPPLE */
+        .ripple {
+            position:absolute; border-radius:50%;
+            transform:scale(0); animation:ripple-a 0.55s linear;
+            pointer-events:none;
+        }
+        @keyframes ripple-a { to{transform:scale(5);opacity:0;} }
+
+        /* GLITCH */
+        .glitch { position:relative; }
+        .glitch::before,.glitch::after {
+            content:attr(data-text);
+            position:absolute; top:0; left:0; right:0;
+            font-family:'Orbitron',sans-serif; font-weight:900; font-style:italic;
+        }
+        .glitch::before {
+            color:var(--neon-cyan); left:3px;
+            clip-path:polygon(0 28%,100% 28%,100% 48%,0 48%);
+            animation:gl1 5s infinite;
+        }
+        .glitch::after {
+            color:var(--neon-purple); left:-3px;
+            clip-path:polygon(0 58%,100% 58%,100% 74%,0 74%);
+            animation:gl2 5s infinite;
+        }
+        @keyframes gl1 { 0%,88%,100%{transform:translate(0)} 90%{transform:translate(-3px,1px)} 95%{transform:translate(2px,-1px)} }
+        @keyframes gl2 { 0%,86%,100%{transform:translate(0)} 88%{transform:translate(3px,-1px)} 93%{transform:translate(-2px,2px)} }
+
+        /* PULSE */
+        @keyframes pulseGlow {
+            0%,100%{box-shadow:0 0 5px rgba(0,242,255,0.3);}
+            50%{box-shadow:0 0 18px rgba(0,242,255,0.8);}
+        }
+        .pulse-dot { animation:pulseGlow 2s ease infinite; }
+
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+        .fade-in { animation:fadeInUp 0.45s ease forwards; }
+
+        .market-bar { transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:var(--deep-space); }
+        ::-webkit-scrollbar-thumb { background:#1e293b; border-radius:10px; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--neon-cyan); }
+        #ai-chat-window::-webkit-scrollbar { width:3px; }
+        #ai-chat-window::-webkit-scrollbar-thumb { background:rgba(0,242,255,0.25); }
+    </style>
+</head>
+<body class="relative">
+
+<canvas id="particle-canvas"></canvas>
+
+<!-- fixed glows -->
+<div style="position:fixed;width:500px;height:500px;top:-180px;left:-180px;background:radial-gradient(circle,rgba(0,242,255,0.055),transparent 70%);filter:blur(80px);z-index:0;pointer-events:none;border-radius:50%;"></div>
+<div style="position:fixed;width:500px;height:500px;bottom:-180px;right:-180px;background:radial-gradient(circle,rgba(157,0,255,0.055),transparent 70%);filter:blur(80px);z-index:0;pointer-events:none;border-radius:50%;"></div>
+
+<div class="relative z-10 p-4 md:p-8">
+<div class="max-w-6xl mx-auto">
+
+    <!-- TICKER -->
+    <div class="ticker-wrap py-2 mb-8 rounded-xl bg-cyan-500/5 border-y border-cyan-500/10">
+        <div class="ticker-track mono text-[9px] text-cyan-400/55 uppercase tracking-widest">
+            <span>⬡ MERCY — AUGUST 15, 2025</span>
+            <span>⬡ AMAZON MGM STUDIOS</span>
+            <span>⬡ DIRECTOR: BEKMAMBETOV</span>
+            <span>⬡ STARRING: CHRIS PRATT</span>
+            <span>⬡ BUDGET: $120M+</span>
+            <span>⬡ PRODUCER: CHARLES ROVEN</span>
+            <span>⬡ PRE-CRIME SYSTEM ONLINE</span>
+            <span>⬡ MERCY — AUGUST 15, 2025</span>
+            <span>⬡ AMAZON MGM STUDIOS</span>
+            <span>⬡ DIRECTOR: BEKMAMBETOV</span>
+            <span>⬡ STARRING: CHRIS PRATT</span>
+            <span>⬡ BUDGET: $120M+</span>
+            <span>⬡ PRODUCER: CHARLES ROVEN</span>
+            <span>⬡ PRE-CRIME SYSTEM ONLINE</span>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="mb-12 relative overflow-hidden p-8 md:p-12 rounded-3xl border border-cyan-500/18 bg-gradient-to-br from-cyan-950/18 to-purple-950/8">
+        <div class="scan-line"></div>
+        <div class="flex flex-col md:flex-row justify-between items-start gap-8">
+            <div class="z-10">
+                <span class="mono text-cyan-400 tracking-[0.3em] text-[9px] uppercase block mb-3">AI Enhanced Report: 2025_MERCY_V_FINAL</span>
+                <h1 class="glitch orbitron text-7xl md:text-9xl font-black text-white tracking-tighter italic" data-text="MERCY">MERCY</h1>
+                <p class="text-lg text-cyan-100/55 max-w-xl font-light mt-5 leading-relaxed">
+                    تفكيك "ثغرة الرحمة" في نظام العدالة الاستباقية. رؤية إخراجية لـ <span class="text-white/80 font-semibold">تيمور بيكمامبيتوف</span>.
+                </p>
+                <p class="text-xs text-cyan-100/30 mt-2">تفاعل مع "خوارزمية ميرسي" لتحليل مستقبل العدالة الاستباقية.</p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl min-w-[270px] z-10 space-y-3">
+                <span class="block mono text-[8px] text-gray-500 uppercase tracking-widest">Amazon MGM Studios</span>
+                <span class="text-2xl font-bold orbitron text-white uppercase block">Aug 15, 2025</span>
+                <div class="space-y-2 pt-2 border-t border-white/5">
+                    <div class="flex justify-between text-xs"><span class="text-gray-500">الميزانية</span><span class="text-cyan-400 font-bold">$120M+</span></div>
+                    <div class="flex justify-between text-xs"><span class="text-gray-500">المنتج</span><span class="text-white">تشارلز روفن</span></div>
+                    <div class="flex justify-between text-xs"><span class="text-gray-500">المخرج</span><span class="text-white">Bekmambetov</span></div>
+                    <div class="flex justify-between text-xs"><span class="text-gray-500">النوع</span><span class="text-white">خيال علمي / جريمة</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COUNTDOWN -->
+        <div class="mt-10 pt-8 border-t border-white/5">
+            <p class="mono text-[8px] text-gray-500 uppercase tracking-widest mb-4">⬡ الوقت المتبقي حتى الإصدار</p>
+            <div class="flex gap-3 flex-wrap">
+                <div class="cd-box"><span class="cd-num" id="cd-days">--</span><span class="cd-lbl">يوم</span></div>
+                <div class="cd-box"><span class="cd-num" id="cd-hours">--</span><span class="cd-lbl">ساعة</span></div>
+                <div class="cd-box"><span class="cd-num" id="cd-mins">--</span><span class="cd-lbl">دقيقة</span></div>
+                <div class="cd-box"><span class="cd-num" id="cd-secs">--</span><span class="cd-lbl">ثانية</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- LIVE STATS -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14">
+        <div class="glass-card rounded-2xl p-5 text-center">
+            <div class="mono text-[8px] text-gray-500 uppercase mb-1">Sci-Fi Score</div>
+            <div class="orbitron text-3xl font-black text-cyan-400 stat-num" data-target="95">0</div>
+            <div class="mono text-[8px] text-gray-600 mt-1">/ 100</div>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center">
+            <div class="mono text-[8px] text-gray-500 uppercase mb-1">Market Potential</div>
+            <div class="orbitron text-3xl font-black text-purple-400 stat-num" data-target="88">0</div>
+            <div class="mono text-[8px] text-gray-600 mt-1">/ 100</div>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center">
+            <div class="mono text-[8px] text-gray-500 uppercase mb-1">Awards Score</div>
+            <div class="orbitron text-3xl font-black text-yellow-400 stat-num" data-target="74">0</div>
+            <div class="mono text-[8px] text-gray-600 mt-1">/ 100</div>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center">
+            <div class="mono text-[8px] text-gray-500 uppercase mb-1">Hype Index</div>
+            <div class="orbitron text-3xl font-black text-red-400 stat-num" data-target="91">0</div>
+            <div class="mono text-[8px] text-gray-600 mt-1">/ 100</div>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+        <!-- LEFT -->
+        <div class="lg:col-span-8 space-y-14">
+
+            <!-- 1. CORE CHALLENGES -->
+            <section>
+                <h2 class="section-title text-3xl font-black italic">التحديات الجوهرية للفيلم</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
+                    <div class="glass-card p-6 rounded-xl border-r-4 border-cyan-500">
+                        <h3 class="text-cyan-400 font-bold mb-3 flex items-center gap-2 text-sm">
+                            <span class="mono text-[9px] opacity-40">01.</span> عدالة استباقية أم حكم جائر؟
+                        </h3>
+                        <p class="text-sm text-gray-300 leading-relaxed">طرح فلسفي جريء: معاقبة الأشخاص على نوايا لم تتحول لأفعال بعد. هل يسلبنا الذكاء الاصطناعي "فرصة التوبة" أو تغيير المسار؟</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl border-r-4 border-purple-500">
+                        <h3 class="text-purple-400 font-bold mb-3 flex items-center gap-2 text-sm">
+                            <span class="mono text-[9px] opacity-40">02.</span> معضلة "صندوق البيانات الأسود"
+                        </h3>
+                        <p class="text-sm text-gray-300 leading-relaxed">عندما تتخذ الخوارزمية قراراً بالإعدام أو السجن، من الذي يحاسبها؟ الفيلم يبرز غياب الشفافية في أنظمة التحكم المستقبلية.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl border-r-4 border-blue-500">
+                        <h3 class="text-blue-400 font-bold mb-3 flex items-center gap-2 text-sm">
+                            <span class="mono text-[9px] opacity-40">03.</span> الصراع النفسي للهوية
+                        </h3>
+                        <p class="text-sm text-gray-300 leading-relaxed">بطل الفيلم (كريس برات) يواجه تآكل هويته؛ يتحول من "منفذ للقانون" إلى "خارج عن القانون" في لحظة واحدة بناءً على سطر برمجي.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl border-r-4 border-yellow-500">
+                        <h3 class="text-yellow-400 font-bold mb-3 flex items-center gap-2 text-sm">
+                            <span class="mono text-[9px] opacity-40">04.</span> هجين "Screenlife" والأكشن
+                        </h3>
+                        <p class="text-sm text-gray-300 leading-relaxed">التحدي التقني للمخرج في دمج أسلوبه السينمائي المعتمد على الشاشات الرقمية مع ضخامة إنتاج هوليوود التقليدي.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. PLOT TWIST -->
+            <section class="space-y-6">
+                <h2 class="section-title text-3xl font-black italic">التحولات الدرامية والمسار</h2>
+                <div class="bg-white/[0.025] p-8 rounded-3xl border border-white/8 relative overflow-hidden group">
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="md:w-1/2">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                                <span class="mono text-[8px] text-red-400 uppercase tracking-widest">CLASSIFIED PLOT DATA</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4 text-white italic">نقطة الانهيار: من محقق إلى مطارد</h3>
+                            <p class="text-gray-400 text-sm mb-5 leading-relaxed">
+                                يبدأ الفيلم في لوس أنجلوس عام 2025، مدينة تنعم بـ "الأمن المطلق". التحول المفصلي يحدث عندما تشير بيانات "ميرسي" إلى البطل نفسه كهدف قادم. هذا الانقلاب يضع المشاهد في رحلة للبحث عن "ثغرة الرحمة" وسط غابة من الحديد والبيانات.
+                            </p>
+                            <div class="flex gap-3 flex-wrap">
+                                <span class="px-3 py-1 bg-cyan-500/12 text-cyan-400 text-[8px] rounded-full border border-cyan-500/25 uppercase font-bold tracking-wider">Plot Twist</span>
+                                <span class="px-3 py-1 bg-white/5 text-white text-[8px] rounded-full border border-white/10 uppercase font-bold tracking-wider">High Stakes</span>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 h-52 bg-gray-900 rounded-2xl border border-white/5 overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1000&auto=format&fit=crop"
+                                 alt="Futuristic LA"
+                                 class="w-full h-full object-cover opacity-45 group-hover:opacity-85 group-hover:scale-105 transition-all duration-700"
+                                 onerror="this.style.display='none'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+                            <div class="absolute bottom-3 left-3 mono text-[7px] text-cyan-400/60 uppercase">Los Angeles — 2025</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-6 rounded-2xl border-l-2 border-cyan-500/35">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-1 h-5 bg-cyan-500 rounded-full"></div>
+                            <h4 class="text-cyan-400 font-bold text-sm">تحول البيئة البصرية</h4>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed">انتقال من إضاءة النيون الزرقاء الباردة (التي تمثل النظام) إلى الألوان الدافئة والترابية للأحياء الفقيرة (التي تمثل التمرد البشري).</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border-l-2 border-purple-500/35">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-1 h-5 bg-purple-500 rounded-full"></div>
+                            <h4 class="text-purple-400 font-bold text-sm">فلسفة "الرحمة" المفقودة</h4>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed">النهاية تطرح تساؤلاً حول ما إذا كان النظام صُمم لخدمة العدالة أم لخدمة السيطرة السياسية تحت ستار "حماية الناس".</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. AI CHAT TERMINAL -->
+            <section class="glass-card rounded-3xl overflow-hidden border border-cyan-500/22">
+                <div class="bg-gradient-to-r from-cyan-950/35 to-slate-900/50 p-4 border-b border-cyan-500/12 flex justify-between items-center">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
+                        <div class="w-2.5 h-2.5 bg-yellow-500 rounded-full"></div>
+                        <div class="w-2.5 h-2.5 bg-green-400 rounded-full pulse-dot"></div>
+                    </div>
+                    <span class="mono text-[8px] text-cyan-400 tracking-widest uppercase">MERCY_SYSTEM_CORE — AI TERMINAL ONLINE</span>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                        <span class="mono text-[8px] text-green-400">LIVE</span>
+                    </div>
+                </div>
+                <div id="ai-chat-window" class="h-72 overflow-y-auto p-5 space-y-3 text-sm font-light">
+                    <div class="flex items-start fade-in">
+                        <div class="bg-cyan-500/12 p-4 rounded-2xl rounded-tr-none border border-cyan-500/22 max-w-[88%]">
+                            <p class="text-sm leading-relaxed">أهلاً بك في نظام ميرسي التحليلي. أنا الذكاء الاصطناعي المسؤول عن تفسير ثغرات العدالة الاستباقية. ماذا تريد أن تعرف عن الفيلم أو فلسفته؟</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 bg-black/18 border-t border-white/5 flex gap-2">
+                    <input type="text" id="ai-input"
+                           placeholder="اسأل عن الفيلم، القصة، الممثلين، الفلسفة..."
+                           class="flex-1 custom-input p-3 rounded-xl text-sm px-4"
+                           onkeydown="if(event.key==='Enter') askAI()">
+                    <button onclick="askAI()" id="send-btn"
+                            class="bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-900 font-black px-5 py-3 rounded-xl transition-all orbitron text-[9px] shrink-0 tracking-wider disabled:opacity-40">
+                        SEND
+                    </button>
+                </div>
+            </section>
+
+            <!-- 4. YES / NO LIVE POLL -->
+            <section class="relative overflow-hidden rounded-3xl border border-white/8 p-8 md:p-12"
+                     style="background:linear-gradient(135deg,rgba(0,242,255,0.035) 0%,rgba(2,6,23,0.9) 50%,rgba(157,0,255,0.035) 100%);">
+                <div class="scan-line" style="opacity:0.07;"></div>
+
+                <div class="text-center mb-10">
+                    <span class="mono text-[8px] text-gray-500 uppercase tracking-[0.3em] block mb-3">⬡ LIVE VOTE — SYSTEM QUERY</span>
+                    <h2 class="orbitron text-2xl md:text-3xl font-black text-white mb-3 leading-tight">
+                        هل تؤيد نظام العدالة الاستباقية؟
+                    </h2>
+                    <p class="text-gray-500 text-sm max-w-md mx-auto leading-relaxed">
+                        إذا كان بإمكان الذكاء الاصطناعي منع الجرائم قبل وقوعها — هل توافق على استخدامه؟
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 max-w-lg mx-auto mb-8">
+                    <!-- YES -->
+                    <button class="vote-btn yes-btn" id="yes-btn" onclick="castVote('yes',this)">
+                        <span class="vote-big">نعم</span>
+                        <span class="vote-count-num" id="yes-count">0</span>
+                        <span class="mono text-[8px] text-cyan-500/45 uppercase tracking-widest">SAFE_MODE</span>
+                        <div class="bar-track w-full">
+                            <div class="bar-fill yes-fill" id="yes-bar" style="width:0%"></div>
+                        </div>
+                        <span class="mono text-[9px] text-cyan-400/50" id="yes-pct">0%</span>
+                    </button>
+                    <!-- NO -->
+                    <button class="vote-btn no-btn" id="no-btn" onclick="castVote('no',this)">
+                        <span class="vote-big">لا</span>
+                        <span class="vote-count-num" id="no-count">0</span>
+                        <span class="mono text-[8px] text-red-500/45 uppercase tracking-widest">REBEL_MODE</span>
+                        <div class="bar-track w-full">
+                            <div class="bar-fill no-fill" id="no-bar" style="width:0%"></div>
+                        </div>
+                        <span class="mono text-[9px] text-red-400/50" id="no-pct">0%</span>
+                    </button>
+                </div>
+
+                <div class="text-center space-y-2">
+                    <span class="mono text-[9px] text-gray-600 uppercase tracking-widest">
+                        إجمالي الأصوات: <span id="total-votes" class="text-gray-400 font-bold">0</span>
+                    </span>
+                    <div id="vote-msg" class="mono text-[9px] text-cyan-400/60 hidden pt-1"></div>
+                </div>
+            </section>
+
+        </div><!-- end left -->
+
+        <!-- RIGHT -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="glass-card p-7 rounded-3xl sticky top-8 space-y-8">
+
+                <!-- CAST -->
+                <div>
+                    <h3 class="orbitron font-bold text-sm mb-6 border-b border-white/7 pb-4 flex items-center gap-2 uppercase">
+                        <span class="w-2 h-2 bg-cyan-500 rounded-full" style="box-shadow:0 0 8px #00f2ff;"></span> طاقم العمل
+                    </h3>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4 group cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-cyan-900/50 border border-cyan-500/35 overflow-hidden shrink-0">
+                                <img src="https://www.themoviedb.org/t/p/w200/83o3ko9cqzb6RR90YXYUIq9SwSpace.jpg"
+                                     class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
+                                     onerror="this.src='https://via.placeholder.com/100/0e2a3a/00f2ff?text=CP'">
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white group-hover:text-cyan-400 transition-colors">Chris Pratt</h4>
+                                <p class="mono text-[8px] text-gray-500 uppercase">Detective Okoro</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 group cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-purple-900/50 border border-purple-500/35 overflow-hidden shrink-0">
+                                <img src="https://www.themoviedb.org/t/p/w200/lJWSZboxPtr87RleAFIasHGZ2aY.jpg"
+                                     class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
+                                     onerror="this.src='https://via.placeholder.com/100/1a0a2e/9d00ff?text=RF'">
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white group-hover:text-purple-400 transition-colors">Rebecca Ferguson</h4>
+                                <p class="mono text-[8px] text-gray-500 uppercase">Special Agent</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 group cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-slate-800 border border-white/12 overflow-hidden shrink-0">
+                                <img src="https://www.themoviedb.org/t/p/w200/vE66hYhVp85PzRTo2vU8GvKxKsh.jpg"
+                                     class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
+                                     onerror="this.src='https://via.placeholder.com/100/1a1a1a/ffffff?text=AW'">
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white group-hover:text-white/70 transition-colors">Annabelle Wallis</h4>
+                                <p class="mono text-[8px] text-gray-500 uppercase">Unknown Entity</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MARKET -->
+                <div class="pt-6 border-t border-white/7 space-y-5">
+                    <h4 class="orbitron text-[8px] font-bold text-gray-500 tracking-widest uppercase">Market Analysis</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mono text-[8px] mb-1.5 uppercase"><span class="text-gray-500">Sci-Fi Element</span><span class="text-cyan-400 font-bold">95%</span></div>
+                            <div class="w-full bg-white/5 h-1.5 rounded-full"><div class="bg-gradient-to-r from-cyan-600 to-cyan-400 h-full rounded-full market-bar" style="width:95%;box-shadow:0 0 6px #00f2ff;"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mono text-[8px] mb-1.5 uppercase"><span class="text-gray-500">Market Potential</span><span class="text-purple-400 font-bold">88%</span></div>
+                            <div class="w-full bg-white/5 h-1.5 rounded-full"><div class="bg-gradient-to-r from-purple-600 to-purple-400 h-full rounded-full market-bar" style="width:88%;box-shadow:0 0 6px #9d00ff;"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mono text-[8px] mb-1.5 uppercase"><span class="text-gray-500">Awards Potential</span><span class="text-yellow-400 font-bold">74%</span></div>
+                            <div class="w-full bg-white/5 h-1.5 rounded-full"><div class="bg-gradient-to-r from-yellow-600 to-yellow-400 h-full rounded-full market-bar" style="width:74%;box-shadow:0 0 6px #eab308;"></div></div>
+                        </div>
+                    </div>
+                    <div class="bg-cyan-500/7 p-4 rounded-xl border border-cyan-500/12">
+                        <p class="text-[8px] text-cyan-100/55 leading-relaxed italic">وجود "تشارلز روفن" (منتج أوبنهايمر) يشير إلى طموح الفيلم للمنافسة في موسم الجوائز وليس فقط شباك التذاكر.</p>
+                    </div>
+                </div>
+
+                <!-- SYSTEM CONTROL -->
+                <div class="pt-6 border-t border-white/7">
+                    <h4 class="orbitron text-[8px] text-gray-500 mb-4 uppercase tracking-widest">System Control</h4>
+                    <div id="system-status" class="flex items-center gap-2 mb-4 mono text-[8px] text-green-400">
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                        CLAUDE_AI_ONLINE — MERCY_CORE_FINAL
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="translatePage('fr')" class="bg-white/3 p-2.5 rounded-lg border border-white/7 mono text-[8px] hover:bg-white/10 hover:border-cyan-500/30 transition-all uppercase">🇫🇷 FRANÇAIS</button>
+                        <button onclick="translatePage('en')" class="bg-white/3 p-2.5 rounded-lg border border-white/7 mono text-[8px] hover:bg-white/10 hover:border-cyan-500/30 transition-all uppercase">🇬🇧 ENGLISH</button>
+                    </div>
+                </div>
+
+            </div>
+        </div><!-- end right -->
+    </div><!-- end main grid -->
+
+    <!-- FOOTER -->
+    <footer class="mt-20 py-12 border-t border-white/7 text-center">
+        <div class="max-w-xl mx-auto">
+            <p class="orbitron text-xl md:text-2xl font-black mb-5 text-white italic tracking-tight uppercase">"The Algorithm Knows. But Does It Care?"</p>
+            <div class="flex justify-center flex-wrap gap-3 mb-6">
+                <span class="mono text-[8px] px-3 py-1 bg-white/3 rounded-full border border-white/7 text-gray-500 uppercase">MGM Studios</span>
+                <span class="mono text-[8px] px-3 py-1 bg-white/3 rounded-full border border-white/7 text-gray-500 uppercase">Amazon Prime</span>
+                <span class="mono text-[8px] px-3 py-1 bg-white/3 rounded-full border border-white/7 text-gray-500 uppercase">Bekmambetov</span>
+                <span class="mono text-[8px] px-3 py-1 bg-white/3 rounded-full border border-white/7 text-gray-500 uppercase">Charles Roven</span>
+            </div>
+            <p class="mono text-[8px] text-gray-700">تحليل إصدار MERCY (2025) — جميع الحقوق محفوظة — 2025_MERCY_V_FINAL</p>
+        </div>
+    </footer>
+
+</div>
+</div>
+
+<script>
+/* PARTICLES */
+(function(){
+    const c=document.getElementById('particle-canvas'),ctx=c.getContext('2d');
+    let W,H,pts=[];
+    function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+    window.addEventListener('resize',resize);resize();
+    function rnd(a,b){return Math.random()*(b-a)+a;}
+    class P{
+        constructor(){this.reset();}
+        reset(){this.x=rnd(0,W);this.y=rnd(0,H);this.vx=rnd(-0.18,0.18);this.vy=rnd(-0.18,0.18);this.r=rnd(0.5,1.4);this.c=Math.random()>.5?'#00f2ff':'#9d00ff';this.a=rnd(0.08,0.45);}
+        update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0)this.x=W;if(this.x>W)this.x=0;if(this.y<0)this.y=H;if(this.y>H)this.y=0;}
+        draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=this.c;ctx.globalAlpha=this.a;ctx.fill();}
+    }
+    for(let i=0;i<75;i++)pts.push(new P());
+    function loop(){
+        ctx.clearRect(0,0,W,H);
+        pts.forEach(p=>{p.update();p.draw();});
+        ctx.globalAlpha=0.03;ctx.strokeStyle='#00f2ff';ctx.lineWidth=0.5;
+        for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+            const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+            if(d<110){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke();}
+        }
+        ctx.globalAlpha=1;
+        requestAnimationFrame(loop);
+    }
+    loop();
+})();
+
+/* COUNTDOWN */
+(function(){
+    const target=new Date('2025-08-15T00:00:00');
+    function pad(n){return String(n).padStart(2,'0');}
+    function tick(){
+        const now=new Date(),diff=target-now;
+        if(diff<=0){['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id=>document.getElementById(id).textContent='00');return;}
+        document.getElementById('cd-days').textContent=pad(Math.floor(diff/864e5));
+        document.getElementById('cd-hours').textContent=pad(Math.floor((diff%864e5)/36e5));
+        document.getElementById('cd-mins').textContent=pad(Math.floor((diff%36e5)/6e4));
+        document.getElementById('cd-secs').textContent=pad(Math.floor((diff%6e4)/1e3));
+    }
+    tick();setInterval(tick,1000);
+})();
+
+/* STAT COUNTER ANIMATION */
+(function(){
+    function animate(el){
+        const target=+el.dataset.target;let cur=0;
+        const step=Math.ceil(target/55);
+        const t=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur;if(cur>=target)clearInterval(t);},16);
+    }
+    const obs=new IntersectionObserver(entries=>{
+        entries.forEach(e=>{if(e.isIntersecting){animate(e.target);obs.unobserve(e.target);}});
+    },{threshold:0.5});
+    document.querySelectorAll('.stat-num').forEach(el=>obs.observe(el));
+})();
+
+/* YES/NO LIVE POLL — unlimited voting, each click +1 */
+const votes={yes:0,no:0};
+
+function castVote(side,btn){
+    // ripple effect
+    const rip=document.createElement('span');
+    rip.className='ripple';
+    rip.style.cssText=`width:120px;height:120px;left:${btn.offsetWidth/2-60}px;top:${btn.offsetHeight/2-60}px;background:${side==='yes'?'rgba(0,242,255,0.22)':'rgba(255,0,60,0.22)'};`;
+    btn.appendChild(rip);
+    setTimeout(()=>rip.remove(),650);
+
+    // add vote
+    votes[side]++;
+    updatePoll();
+
+    // highlight clicked btn briefly
+    btn.classList.add('voted');
+    setTimeout(()=>btn.classList.remove('voted'),800);
+
+    // message
+    const msg=document.getElementById('vote-msg');
+    msg.textContent=side==='yes'
+        ? '⬡ صوت جديد: تأييد النظام — SAFE_MODE +1'
+        : '⬡ صوت جديد: رفض النظام — REBEL_MODE +1';
+    msg.classList.remove('hidden');
+    clearTimeout(msg._t);
+    msg._t=setTimeout(()=>msg.classList.add('hidden'),2200);
+}
+
+function animCount(id,target){
+    const el=document.getElementById(id);
+    const start=+el.textContent||0;
+    const diff=target-start; if(!diff)return;
+    let f=0;const frames=12;
+    const t=setInterval(()=>{f++;el.textContent=Math.round(start+diff*(f/frames));if(f>=frames){el.textContent=target;clearInterval(t);}},15);
+}
+
+function updatePoll(){
+    const total=votes.yes+votes.no;
+    const yp=total?Math.round(votes.yes/total*100):0;
+    const np=total?Math.round(votes.no/total*100):0;
+    animCount('yes-count',votes.yes);
+    animCount('no-count',votes.no);
+    document.getElementById('yes-bar').style.width=yp+'%';
+    document.getElementById('no-bar').style.width=np+'%';
+    document.getElementById('yes-pct').textContent=yp+'%';
+    document.getElementById('no-pct').textContent=np+'%';
+    document.getElementById('total-votes').textContent=total;
+}
+
+/* AI CHAT */
+async function callClaude(msg,sys=''){
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:msg}]})
+    });
+    if(!r.ok)throw new Error();
+    const d=await r.json();
+    return d.content?.[0]?.text||'لا يمكن الحصول على إجابة حالياً.';
+}
+function appendMsg(html){
+    const win=document.getElementById('ai-chat-window');
+    const div=document.createElement('div');div.className='fade-in';div.innerHTML=html;
+    win.appendChild(div);win.scrollTop=win.scrollHeight;
+}
+async function askAI(){
+    const input=document.getElementById('ai-input'),btn=document.getElementById('send-btn');
+    const q=input.value.trim();if(!q)return;
+    input.value='';btn.disabled=true;
+    appendMsg(`<div class="flex justify-end mb-3"><div class="bg-white/5 p-3 rounded-2xl rounded-tl-none border border-white/10 text-cyan-100 max-w-[85%] text-sm">${q}</div></div>`);
+    const tid='t'+Date.now();
+    appendMsg(`<div id="${tid}" class="flex items-start mb-3"><div class="bg-cyan-500/10 p-3 rounded-2xl border border-cyan-500/15 text-cyan-400 text-xs"><span class="ai-loading mr-2"></span> جاري فك تشفير البيانات...</div></div>`);
+    try{
+        const sys=`أنت مساعد ذكي خبير في فيلم MERCY 2025 — فيلم خيال علمي يصدر أغسطس 2025 بطولة كريس برات وريبيكا فيرغسون وأنابيل واليس، إخراج تيمور بيكمامبيتوف، إنتاج Amazon MGM Studios بميزانية 120 مليون دولار. القصة: في لوس أنجلوس 2025 تعمل منظومة ذكاء اصطناعي "ميرسي" لاعتقال الناس قبل ارتكاب جرائمهم. المحقق أوكورو (كريس برات) يتحول من منفذ للقانون إلى مطارد منه. أجب بأسلوب تقني مستقبلي مثير بالعربية الفصيحة.`;
+        const reply=await callClaude(q,sys);
+        document.getElementById(tid)?.remove();
+        appendMsg(`<div class="flex items-start mb-3"><div class="bg-cyan-500/12 p-4 rounded-2xl rounded-tr-none border border-cyan-500/22 max-w-[90%] text-sm leading-relaxed">${reply}</div></div>`);
+    }catch(e){
+        document.getElementById(tid).innerHTML=`<div class="bg-red-500/10 p-3 rounded-2xl border border-red-500/18 text-red-400 text-xs">خطأ في الاتصال بالشبكة العصبية.</div>`;
+    }finally{btn.disabled=false;}
+}
+
+/* TRANSLATE */
+async function translatePage(lang){
+    const s=document.getElementById('system-status');
+    s.innerHTML=`<span class="ai-loading mr-2"></span><span class="mono text-[8px] text-cyan-400">TRANSLATING TO ${lang.toUpperCase()}...</span>`;
+    try{
+        const h1=document.querySelector('h1');
+        const r=await callClaude(`Translate to ${lang==='fr'?'French':'English'}: "${h1.innerText}". Return only the translated string.`);
+        h1.innerText=r.trim();h1.setAttribute('data-text',r.trim());
+        s.innerHTML=`<span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span><span class="mono text-[8px] text-blue-400 ml-1">LANG: ${lang.toUpperCase()} ACTIVE</span>`;
+    }catch(e){
+        s.innerHTML=`<span class="mono text-[8px] text-red-400">ERROR: TRANSLATION FAILED</span>`;
+    }
+}
+</script>
+</body>
+</html>
